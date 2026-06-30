@@ -1,13 +1,31 @@
+import math
 import random
 
-def generate_prices(start_price=100, days=250, seed=42):
+def random_t(df):
+    x = random.gauss(0, 1)
+    y = random.gammavariate(df / 2, 2)
+    return x / math.sqrt(y / df)
+
+def generate_prices(start_price=100, days=1000, seed=42):
     random.seed(seed)
     prices = []
     price = start_price
+    drift = 0.08 / 252
+    current_vol = 0.015
 
     for i in range(days):
         prices.append(price)
-        change = random.gauss(0, 1) * 0.015
+
+        if random.random() < 0.05:
+            current_vol = random.expovariate(1 / 0.008)
+
+        t_shock = random_t(4) * current_vol
+
+        jump = 0
+        if random.random() < 0.01:
+            jump = random.choice([-0.07, 0.07])
+
+        change = drift + t_shock + jump
         price = price * (1 + change)
     return prices
 
